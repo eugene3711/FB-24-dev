@@ -1,0 +1,59 @@
+.list {
+    margin-left: 40px;
+    text-align: left;
+    width: 300px;
+    border: 1px;
+    border-color: #3d36ff;
+    height: 700px;
+    overflow-y: auto; 
+}
+
+.headmap {
+    color: #3d36ff;
+    font-size: large;
+    text-align: center;
+}
+
+.main {
+    display: flex;
+    width: 90%;
+    margin: 0 auto;
+    height: 100%;    
+}
+
+
+#mapid {    
+    height: 700px;
+    width: 70%;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);    
+    border: 1px;
+    border-color: orange;
+}
+
+.dev-item {
+    background-color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
+    margin: 10px 0;
+    width: 250px;
+    list-style-type: none;
+    background-position: right;
+    text-indent: 10px;
+    padding: 5px 0;
+}
+
+.dev-item:hover {
+    cursor: pointer;
+    background-color: rgb(191, 184, 199);
+  }
+  
+.dev-item:active {
+    background-color: rgb(71, 43, 104);
+    box-shadow: 0 0 10px 5px black;
+}
+
+.button-toggle {
+    background-color: rgb(33, 84, 172);
+    color: aliceblue;
+    
+}
+  

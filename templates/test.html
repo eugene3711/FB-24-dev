@@ -1,0 +1,166 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<h1 class="headmap">Developments</h1>
+
+<div class="main">
+    <div class="list">
+    <button id="check_all">ALL</button>
+    <button id="draw">DRAW</button>
+    <button id="clear">CLEAR</button>          
+</div>
+
+<div id="mapid"></div>
+</div>  
+
+
+<div class="list"></div>
+
+
+<script>
+let list_div = document.querySelector(".list")
+
+let circles = []
+
+function createCircle (lat,lon,rad,name,color) {
+let circle = new L.circle([lat, lon], {
+    color: "#006400",
+    fillColor: color,
+    fillOpacity: 0.3,
+    radius: rad*1000
+})
+circles.push(circle)
+circles.slice(-1)[0].bindPopup(name).addTo(mymap);
+                }
+
+function delete_circles() {
+    for (c of circles) {
+        mymap.removeLayer(c)
+    }
+}
+
+
+function getRandomColor() {
+  let letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
+let mymap = L.map('mapid').setView([54, -3], 6);
+L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox/streets-v11',
+    accessToken: 'pk.eyJ1IjoicmF6b3IzNzExIiwiYSI6ImNrM3VnMGl6ejA1dHkzbXRkamI2ZGJldnoifQ.VvtOVTiuLGmI5lv3iC-SlQ'
+}).addTo(mymap);
+/*
+let getCoord = (devIds) => {
+    let coords = []
+    fetch(`http://127.0.0.1:5000/map-data?devs=${devIds}`, { method: "GET" })
+    .then(response => response.json())
+    .then(responseText => coords.push(responseText))
+    return coords
+}
+*/
+let myIcon = L.icon({   
+    iconSize: [38, 95]})
+
+
+let getGeo = () => {
+  fetch("http://127.0.0.1:5000/geodata", { method: "GET" })
+    .then(response => response.json())
+    .then(responseText => {
+      responseText.developments.forEach(element => {
+        let listItem = document.createElement("li");
+        listItem.innerText = element.name;
+        listItem.setAttribute('id', element.id);
+        listItem.classList.add("dev-item");  
+        L.marker([element.lat, element.lon]).bindPopup(element.name).addTo(mymap); //, {icon: myIcon}
+        listItem.addEventListener("click", () => {
+            listItem.classList.toggle("button-toggle")           
+          }       
+        );
+        list_div.append(listItem);
+      });
+    }
+    )};
+
+let allButton = document.getElementById('check_all')
+
+allButton.addEventListener('click', () => {
+  let devs = document.querySelectorAll('.dev-item')
+  devs.forEach(dev => {
+    dev.classList.add('button-toggle')
+  }
+  )
+})
+
+let drawButton = document.getElementById('draw')
+
+drawButton.addEventListener('click', () => {
+  let chosen = document.querySelectorAll('.button-toggle') //stop if empty  
+  let idList = []
+  chosen.forEach((current) => {
+    idList.push(current.getAttribute('id'))
+  })
+  let coords = []  
+  fetch(`http://127.0.0.1:5000/map-data?devs=${idList}`, { method: "GET" })
+  .then(response => response.json())
+  .then(devList => {
+    delete_circles()
+
+    /*
+    mymap.eachLayer((layer) => {
+        if (layer._leaflet_id != 24) {
+          mymap.removeLayer(layer);}
+    });
+    console.log(devList.list)
+    */
+    for (dev of devList.list) {
+      let color = getRandomColor()
+      let name = dev.name
+      for (one of dev.geo) {
+        createCircle (one.lat, one.lon, one.radius, name,color)
+      }
+    }
+  })
+})
+
+let clearButton = document.getElementById('clear')
+
+clearButton.addEventListener('click', () => {
+  let chosen = document.querySelectorAll('.button-toggle')  
+  chosen.forEach((current) => {
+    current.classList.toggle('button-toggle')    
+  })
+  delete_circles()
+  
+  /*
+  mymap.eachLayer((layer) => {
+        if (layer._leaflet_id != 24) {
+          mymap.removeLayer(layer);}
+    });
+*/
+
+})
+
+getGeo()
+
+
+/*
+TO DO:
+
+придумать, как создавать кружочки как список объектов, чтобы их можно было удалять
+т.к. данные каждый раз запрашиваются, можно просто удалять ВСЁ что было
+
+
+
+*/
+       
+</script>
+
+{% endblock %}
